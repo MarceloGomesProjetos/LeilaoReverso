@@ -180,3 +180,7 @@ Se quiser, eu posso:
 - Ajustar o conteúdo (mais detalhes sobre endpoints, esquema do banco ou instruções Docker),
 - Gerar um exemplo de arquivo `.env` seguro sem dados reais,
 - Ou criar um guia de instalação passo a passo com scripts de migração/seed se você fornecer os esquemas.
+
+## Branches
+
+Adicionando um novo Branch aprendendo um pouco mais sobre o Git
