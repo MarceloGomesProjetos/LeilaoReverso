@@ -1,5 +1,6 @@
 // controllers/bidController.js
 const { query, transaction } = require('../config/database');
+const { broadcast } = require('../utils/websocket');
 
 // Criar um novo lance
 exports.createBid = async (req, res) => {
@@ -121,6 +122,9 @@ exports.createBid = async (req, res) => {
       message: 'Lance criado com sucesso',
       bid: result
     });
+
+    // Notifica via WebSocket
+    broadcast(auction_id, 'new_bid', result);
 
   } catch (error) {
     console.error('Erro ao criar lance:', error);
@@ -286,67 +290,88 @@ exports.getMyBids = async (req, res) => {
 exports.withdrawBid = async (req, res) => {
   const { id } = req.params;
   const supplier_id = req.user.id;
+  let eventPayload = {};
 
   try {
-    // Verifica se o lance existe e pertence ao fornecedor
-    const bidResult = await query(
-      `SELECT b.*, a.status as auction_status, a.end_date
-       FROM bids b
-       JOIN auctions a ON b.auction_id = a.id
-       WHERE b.id = $1 AND b.supplier_id = $2`,
-      [id, supplier_id]
-    );
-
-    if (bidResult.rows.length === 0) {
-      return res.status(404).json({
-        error: 'Lance não encontrado ou você não tem permissão'
-      });
-    }
-
-    const bid = bidResult.rows[0];
-
-    // Verifica se o leilão ainda está ativo
-    if (bid.auction_status !== 'active') {
-      return res.status(400).json({
-        error: 'Não é possível retirar lance de leilão inativo'
-      });
-    }
-
-    // Marca o lance como retirado
-    await query(
-      'UPDATE bids SET status = $1 WHERE id = $2',
-      ['withdrawn', id]
-    );
-
-    // Atualiza o preço atual do leilão para o próximo menor lance
-    const nextBidResult = await query(
-      `SELECT MIN(bid_amount) as next_price
-       FROM bids
-       WHERE auction_id = $1 AND status = 'active' AND id != $2`,
-      [bid.auction_id, id]
-    );
-
-    const nextPrice = nextBidResult.rows[0]?.next_price;
-
-    if (nextPrice) {
-      await query(
-        'UPDATE auctions SET current_price = $1 WHERE id = $2',
-        [nextPrice, bid.auction_id]
+    // Usa transação para garantir consistência
+    await transaction(async (client) => {
+      // Verifica se o lance existe, pertence ao fornecedor e pega dados do leilão
+      const bidResult = await client.query(
+        `SELECT b.*, 
+                a.status as auction_status, 
+                a.current_price, 
+                a.initial_price
+         FROM bids b
+         JOIN auctions a ON b.auction_id = a.id
+         WHERE b.id = $1 AND b.supplier_id = $2`,
+        [id, supplier_id]
       );
-    } else {
-      // Se não há mais lances, volta ao preço inicial
-      await query(
-        'UPDATE auctions SET current_price = initial_price WHERE id = $1',
-        [bid.auction_id]
+
+      if (bidResult.rows.length === 0) {
+        throw new Error('Lance não encontrado ou você não tem permissão');
+      }
+
+      const bid = bidResult.rows[0];
+      eventPayload.auction_id = bid.auction_id;
+      eventPayload.withdrawn_bid_id = bid.id;
+
+      // Verifica se o leilão ainda está ativo
+      if (bid.auction_status !== 'active') {
+        throw new Error('Não é possível retirar lance de leilão inativo');
+      }
+
+      // Marca o lance como retirado
+      await client.query(
+        "UPDATE bids SET status = 'withdrawn' WHERE id = $1",
+        [id]
       );
-    }
+
+      let new_current_price = bid.current_price;
+
+      // Só atualiza o preço do leilão se o lance retirado era o vencedor
+      if (bid.bid_amount === bid.current_price) {
+        // Atualiza o preço atual do leilão para o próximo menor lance
+        const nextBidResult = await client.query(
+          `SELECT MIN(bid_amount) as next_price
+           FROM bids
+           WHERE auction_id = $1 AND status = 'active'`,
+          [bid.auction_id]
+        );
+
+        const nextPrice = nextBidResult.rows[0]?.next_price;
+
+        if (nextPrice) {
+          new_current_price = nextPrice;
+          await client.query(
+            'UPDATE auctions SET current_price = $1 WHERE id = $2',
+            [nextPrice, bid.auction_id]
+          );
+        } else {
+          // Se não há mais lances, volta para null (ou preço inicial)
+          new_current_price = null;
+          await client.query(
+            'UPDATE auctions SET current_price = NULL WHERE id = $1',
+            [bid.auction_id]
+          );
+        }
+      }
+      eventPayload.new_current_price = new_current_price;
+    });
 
     res.json({
       message: 'Lance retirado com sucesso'
     });
 
+    // Notifica via WebSocket
+    broadcast(eventPayload.auction_id, 'bid_withdrawn', eventPayload);
+
   } catch (error) {
     console.error('Erro ao retirar lance:', error);
+
+    if (error.message.includes('não encontrado') || error.message.includes('inativo')) {
+        return res.status(400).json({ error: error.message });
+    }
+
     res.status(500).json({
       error: 'Erro ao retirar lance',
       details: error.message
