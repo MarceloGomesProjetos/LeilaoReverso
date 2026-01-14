@@ -19,7 +19,7 @@ const ReverseAuctionDocs = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-6xl mx-auto">
-        <header className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <header className="bg-white rounded-lg shadow-lg p-6 mb-6 text-center">
           <h1 className="text-3xl font-bold text-indigo-900 mb-2">
             Sistema de Leilão Reverso
           </h1>

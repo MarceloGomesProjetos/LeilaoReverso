@@ -1,8 +1,12 @@
+@import "tailwindcss";
+
+@source "../index.html";
+@source "./**/*.{js,ts,jsx,tsx}";
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
 }
 
 .logo {
