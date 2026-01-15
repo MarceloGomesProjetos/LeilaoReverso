@@ -1,4 +1,5 @@
 const { query } = require('../config/database');
+const aiService = require('../services/aiService');
 
 // Criar um novo leilão
 exports.createAuction = async (req, res) => {
@@ -49,6 +50,26 @@ exports.getAuctionById = async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'Leilão não encontrado' });
     res.json(result.rows[0]);
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getBidSuggestion = async (req, res) => {
+  const { id } = req.params; // ID do leilão    
+  try {
+    const suggestion = await aiService.generateStrategicBid(id);
+
+    if (suggestion === null) {
+      return res.status(404).json({ error: 'Leilão não encontrado ou sem dados suficientes para sugestão' });
+    }
+
+    res.json({
+      auction_id: id, 
+      suggestion_amount: suggestion,
+      message: 'Sugestão de lance gerada com sucesso'
+    });
+  } catch (error) {
+    console.error('Erro ao gerar sugestão de lance:', error);
     res.status(500).json({ error: error.message });
   }
 };
