@@ -1,11 +1,19 @@
 // controllers/bidController.js
 const { query, transaction } = require('../config/database');
 const { broadcast } = require('../utils/websocket');
-
+const aiService = require('../services/aiService');
 // Criar um novo lance
 exports.createBid = async (req, res) => {
   const { auction_id, bid_amount, delivery_days, comments } = req.body;
   const supplier_id = req.user.id;
+  const isBot = await aiService.detectBotBehavior(auction_id, supplier_id);
+  
+  if (isBot) {
+    return res.status(403).json({
+      error: 'Comportamento suspeito detectado. Por favor, aguarde antes de tentar novamente.',
+      message: 'Comportamento suspeito detectado. Por favor, aguarde antes de tentar novamente.'
+    });
+  }
 
   try {
     // Validações básicas

@@ -11,6 +11,6 @@ router.get('/active', auctionController.getActiveAuctions);
 router.post('/', authMiddleware, auctionController.createAuction);
 
 // Rotas com parâmetros (deixar por último)
-router.get('/:id', auctionController.getAuctionById);
+router.get('/:id/suggest', authMiddleware, auctionController.getBidSuggestion);
 
 module.exports = router;
