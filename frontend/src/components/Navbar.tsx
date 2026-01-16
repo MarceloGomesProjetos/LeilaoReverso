@@ -30,6 +30,11 @@ const Navbar = () => {
 
           <div className="hidden md:flex space-x-6 text-sm font-medium">
             <Link to="/" className="hover:text-blue-200 transition-colors">Home</Link>
+            <Link to="/quem-somos" className="hover:text-blue-200 transition-colors">Quem Somos</Link>
+            <Link to="/servicos" className="hover:text-blue-200 transition-colors">Serviços</Link>
+            <Link to="/produtos" className="hover:text-blue-200 transition-colors">Produtos</Link>
+            <Link to="/faq" className="hover:text-blue-200 transition-colors">FAQ's</Link>
+            
             {isAuthenticated && (
               <Link to="/dashboard" className="hover:text-blue-200 transition-colors font-bold text-blue-200">
                 Dashboard
