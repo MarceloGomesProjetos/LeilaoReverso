@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, LogIn, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -9,42 +10,50 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const loadingToast = toast.loading('Autenticando...');
+
     try {
-      // Envia para o seu authController.js no backend
+      // Chamada para o seu AuthController.js
       const response = await api.post('/auth/login', formData);
       
-      // Armazena o Token para uso nos middlewares
+      // Salvando os dados essenciais no navegador
       localStorage.setItem('@ShortWin:token', response.data.token);
       localStorage.setItem('@ShortWin:user', JSON.stringify(response.data.user));
       
-      navigate('/'); // Redireciona para a Home após sucesso
+      toast.dismiss(loadingToast);
+      toast.success(`Bem-vindo, ${response.data.user.name}!`);
+
+      // Redireciona para o Dashboard que acabamos de criar
+      navigate('/dashboard');
     } catch (error: any) {
-      alert(error.response?.data?.error || 'Erro ao realizar login');
+      toast.dismiss(loadingToast);
+      const message = error.response?.data?.error || 'E-mail ou senha incorretos';
+      toast.error(message);
     }
   };
 
   return (
-    <div className="flex flex-col md:flex-row w-full min-h-[calc(100vh-64px)] m-0 p-0 overflow-hidden">
+    <div className="flex flex-col md:flex-row w-full min-h-[calc(100vh-64px)] m-0 p-0 overflow-hidden bg-white">
       
-      {/* LADO ESQUERDO: Visual / Branding (50%) */}
+      {/* LADO ESQUERDO: Branding Full-Width */}
       <div className="hidden md:flex md:w-1/2 bg-blue-700 p-16 flex-col justify-center text-white">
         <div className="max-w-md mx-auto">
           <Link to="/" className="flex items-center text-blue-200 hover:text-white mb-12 transition-colors">
             <ArrowLeft className="w-5 h-5 mr-2" /> Voltar para o site
           </Link>
-          <h1 className="text-5xl font-extrabold mb-6 leading-tight">Bem-vindo de volta ao <span className="text-blue-300">ShortWin.</span></h1>
-          <p className="text-xl text-blue-100">
-            Acesse sua conta para gerenciar leilões e dar lances em tempo real monitorados por nossa IA.
+          <h1 className="text-5xl font-extrabold mb-6 leading-tight">Acesse o <span className="text-blue-300">ShortWin.</span></h1>
+          <p className="text-xl text-blue-100 font-medium">
+            Gerencie seus leilões e acompanhe lances em tempo real com segurança garantida por IA.
           </p>
         </div>
       </div>
 
-      {/* LADO DIREITO: Formulário de Acesso (50%) */}
-      <div className="w-full md:w-1/2 bg-white p-8 md:p-24 flex items-center justify-center">
+      {/* LADO DIREITO: Formulário */}
+      <div className="w-full md:w-1/2 p-8 md:p-24 flex items-center justify-center">
         <div className="w-full max-w-md">
-          <div className="mb-10 text-center md:text-left">
-            <h2 className="text-3xl font-bold text-blue-900 mb-2">Entrar</h2>
-            <p className="text-gray-500 font-medium">Insira suas credenciais abaixo.</p>
+          <div className="mb-10">
+            <h2 className="text-3xl font-bold text-blue-900 mb-2">Login</h2>
+            <p className="text-gray-500">Entre com sua conta corporativa.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -80,15 +89,15 @@ const Login = () => {
 
             <button 
               type="submit" 
-              className="w-full py-4 mt-4 bg-blue-700 text-white font-black rounded-xl hover:bg-blue-800 transition-all shadow-xl shadow-blue-100 flex items-center justify-center"
+              className="w-full py-4 mt-4 bg-blue-700 text-white font-black rounded-xl hover:bg-blue-800 transition-all shadow-xl shadow-blue-100 flex items-center justify-center group"
             >
-              ACESSAR MINHA CONTA
-              <LogIn className="ml-2 w-5 h-5" />
+              ENTRAR NO PAINEL
+              <LogIn className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </form>
 
           <p className="mt-10 text-center text-gray-500 font-medium">
-            Ainda não tem conta? <Link to="/register" className="text-blue-700 font-bold hover:underline">Cadastre-se grátis</Link>
+            Ainda não tem conta? <Link to="/register" className="text-blue-700 font-bold hover:underline">Cadastre sua empresa</Link>
           </p>
         </div>
       </div>
