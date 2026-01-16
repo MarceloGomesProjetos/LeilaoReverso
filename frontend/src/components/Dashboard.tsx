@@ -2,8 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { Gavel, Plus, LayoutDashboard, History, Settings } from 'lucide-react';
 
 const Dashboard = () => {
-  // Simulação do usuário logado vindo do localStorage futuramente
-  const [user, setUser] = useState({ name: 'Usuário', user_type: 'buyer' });
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await api.get('/auth/profile');
+        setUser(response.data.user);
+      } catch (error) {
+        console.error('Erro ao buscar dados do usuário:', error);
+        // Tratar erro, talvez redirecionar para o login
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  if (!user) {
+    return <div>Carregando...</div>;
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-64px)] w-full bg-gray-50 m-0 p-0">

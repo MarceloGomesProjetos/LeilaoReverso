@@ -7,6 +7,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const auctionRoutes = require('./routes/auctions');
 const bidRoutes = require('./routes/bids');
+const notificationRoutes = require('./routes/notifications');
 const webSocket = require('./utils/websocket');
 const db = require('./config/database');
 
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/auctions', auctionRoutes);
 app.use('/api/bids', bidRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 db.testConnection(); // Testa a conexão ao iniciar
 

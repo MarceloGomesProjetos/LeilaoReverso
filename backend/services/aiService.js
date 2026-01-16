@@ -51,3 +51,42 @@ exports.generateStrategicBid = async (auctionId) => {
 
   return parseFloat(suggestion.toFixed(2));
 };
+
+// 3. Geração de Relatório Pós-Leilão (Analytics)
+exports.generateAuctionReport = async (auctionId) => {
+  // Coleta todos os dados necessários em uma única consulta (ou múltiplas se necessário)
+  const auctionData = await query(
+    `SELECT 
+        a.title as auction_title, a.end_date, a.initial_price, a.current_price, a.category,
+        (SELECT COUNT(*) FROM bids WHERE auction_id = a.id) as total_bids,
+        (SELECT u.name FROM users u JOIN bids b ON u.id = b.supplier_id WHERE b.auction_id = a.id AND b.bid_amount = a.current_price LIMIT 1) as winner_name,
+        a.current_price as winner_bid
+     FROM auctions a
+     WHERE a.id = $1`,
+    [auctionId]
+  );
+
+  if (auctionData.rows.length === 0) return null;
+
+  const { auction_title, end_date, initial_price, current_price, category, total_bids, winner_name, winner_bid } = auctionData.rows[0];
+  
+  const savings = initial_price - current_price;
+  const savings_percent = ((savings / initial_price) * 100).toFixed(2);
+  
+  // Lógica simples para score de risco (ex: leilões com poucos lances são mais arriscados)
+  const risk_score = total_bids < 3 ? 7 : (total_bids < 5 ? 5 : 3);
+
+  return {
+    auction_title,
+    end_date,
+    savings,
+    savings_percent,
+    total_bids,
+    risk_score,
+    recommended_supplier: {
+      name: winner_name || 'N/A',
+      bid_amount: winner_bid || 0
+    },
+    category
+  };
+};

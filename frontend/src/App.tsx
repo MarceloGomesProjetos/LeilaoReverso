@@ -9,6 +9,10 @@ import Login from './components/Login';
 import { Toaster } from 'react-hot-toast';
 import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './components/Dashboard';
+import CreateAuction from './components/CreateAuction';
+import AuctionRoom from './components/AuctionRoom';
+import Faq from './components/Faq';
+import AboutUs from './components/AboutUs';
 
 
 const HomePage = () => (
@@ -30,9 +34,13 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/faq" element={<Faq />} />
+          <Route path="/quem-somos" element={<AboutUs />} />
           {/* Rotas futuras: /auctions/:id, /dashboard */}
           <Route element={<PrivateRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path='/auctions/create' element={<CreateAuction />}/>
+            <Route path="/auctions/:id" element={<AuctionRoom />} />
           </Route>
         </Routes>
       </div>
