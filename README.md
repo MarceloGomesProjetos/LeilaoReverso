@@ -1,12 +1,13 @@
 # Leilão Reverso
 
-Leilão Reverso é um sistema de leilões onde o menor lance vence. Este repositório contém uma aplicação full‑stack com backend em Node.js/Express e frontend em Vite (TypeScript). O backend também oferece suporte a WebSocket para atualização de lances em tempo real.
+Leilão Reverso é um sistema de leilões onde o menor lance vence. Este repositório contém uma aplicação full-stack com backend em Node.js/Express e frontend em React com Vite (TypeScript). O backend também oferece suporte a WebSocket para atualização de lances em tempo real.
 
 ---
 
 ## Índice
 
 - [Visão Geral](#visão-geral)
+- [Features](#features)
 - [Tecnologias](#tecnologias)
 - [Estrutura do Repositório](#estrutura-do-repositório)
 - [Pré-requisitos](#pré-requisitos)
@@ -24,163 +25,161 @@ Leilão Reverso é um sistema de leilões onde o menor lance vence. Este reposit
 
 ## Visão Geral
 
-Este projeto implementa um sistema de Leilão Reverso com:
-- Cadastro/autenticação de usuários
-- Criação e listagem de leilões
-- Sistema de lances em que o menor lance vence
-- Notificações de lances em tempo real via WebSocket
+Este projeto implementa um sistema de Leilão Reverso com as seguintes funcionalidades principais:
+- Cadastro e autenticação de usuários com JWT.
+- Criação, listagem e visualização de leilões.
+- Sistema de lances onde o menor lance único é o vencedor.
+- Notificações e atualização de lances em tempo real via WebSocket.
+
+---
+
+## Features
+
+- **Autenticação de Usuários:** Sistema completo de registro e login com validação de dados e tokens JWT para segurança.
+- **Listagem de Leilões:** Página inicial que exibe os leilões ativos, permitindo que os usuários vejam as oportunidades disponíveis.
+- **Sala de Leilão:** Página dedicada para cada leilão, onde os usuários podem dar seus lances. (Futura implementação)
+- **Lances em Tempo Real:** Os lances são processados e atualizados em tempo real para todos os participantes do leilão usando WebSockets.
+- **Notificações:** Sistema de notificações instantâneas (usando `react-hot-toast`) para feedback do usuário (e.g., sucesso ao fazer login, erros).
+- **Design Moderno:** Interface de usuário limpa e responsiva construída com React, Tailwind CSS e ícones da biblioteca `lucide-react`.
 
 ---
 
 ## Tecnologias
 
-- Backend: Node.js, Express, ws (WebSocket)
-- Banco de dados: PostgreSQL
-- Frontend: Vite, TypeScript, Tailwind CSS (configurações já existentes no `frontend`)
-- Gerenciamento de pacotes: npm
+### Backend
+- **Runtime:** Node.js
+- **Framework:** Express
+- **Banco de Dados:** PostgreSQL
+- **WebSockets:** `ws`
+- **Autenticação:** `jsonwebtoken` (JWT)
+- **ORM/Driver:** `pg`
+
+### Frontend
+- **Framework:** React com Vite
+- **Linguagem:** TypeScript
+- **Estilização:** Tailwind CSS
+- **Roteamento:** `react-router-dom`
+- **Comunicação HTTP:** `axios`
+- **Comunicação Real-time:** `socket.io-client`
+- **Notificações:** `react-hot-toast`
+- **Ícones:** `lucide-react`
 
 ---
 
 ## Estrutura do Repositório
 
-- `/backend` — API e servidor WebSocket
-- `/frontend` — Aplicação cliente (Vite + TS)
-- (Outros arquivos de configuração: `frontend/package.json`, `backend/package.json`, etc.)
+- **/backend**: Contém a API RESTful e o servidor WebSocket.
+- **/frontend**: Contém a aplicação cliente em React.
+- **.gitignore**: Arquivos e pastas a serem ignorados pelo Git.
+- **README.md**: Este arquivo.
 
 ---
 
 ## Pré-requisitos
 
-- Node.js (recomenda-se v16+)
-- npm
+- Node.js (v16 ou superior)
+- npm (geralmente instalado com o Node.js)
 - PostgreSQL
 
 ---
 
 ## Configuração
 
-1. Clone o repositório:
-   ```
-   git clone https://github.com/MarceloGomesProjetos/LeilaoReverso.git
-   ```
+1.  **Clone o repositório:**
+    ```bash
+    git clone https://github.com/MarceloGomesProjetos/LeilaoReverso.git
+    cd LeilaoReverso
+    ```
 
-2. Backend — variáveis de ambiente
-   - Crie um arquivo `.env` dentro de `/backend` com as variáveis necessárias (exemplo):
-     ```
-     PORT=3000
-     DB_HOST=localhost
-     DB_PORT=5432
-     DB_NAME=LeilaoReverso
-     DB_USER=postgres
-     DB_PASSWORD=sua_senha_aqui
-     JWT_SECRET=seu_secret_key_aqui
-     ```
-   - Observação: não comite o `.env` no repositório.
+2.  **Configure o Backend:**
+    - Navegue até a pasta do backend: `cd backend`
+    - Crie um arquivo `.env` a partir do exemplo abaixo e preencha com suas credenciais:
+      ```env
+      PORT=3000
+      DB_HOST=localhost
+      DB_PORT=5432
+      DB_NAME=LeilaoReverso
+      DB_USER=postgres
+      DB_PASSWORD=sua_senha_aqui
+      JWT_SECRET=seu_secret_key_aqui
+      ```
+    - Instale as dependências: `npm install`
 
-3. Prepare o banco de dados PostgreSQL:
-   - Crie o banco com o nome definido em `DB_NAME` e o usuário configurado.
-   - Execute migrations ou crie as tabelas necessárias (veja a seção Banco de dados abaixo).
+3.  **Configure o Frontend:**
+    - Navegue até a pasta do frontend: `cd ../frontend`
+    - Instale as dependências: `npm install`
+
+4.  **Banco de Dados:**
+    - Certifique-se de que o servidor PostgreSQL esteja em execução.
+    - Crie um banco de dados com o nome que você especificou em `DB_NAME` no arquivo `.env` do backend.
+    - (WIP) Crie as tabelas necessárias. O esquema do banco de dados ainda será documentado.
 
 ---
 
 ## Executando a aplicação
 
-Backend
-1. Instale dependências:
-   ```
-   cd backend
-   npm install
-   ```
-2. Inicie o servidor:
-   - Se existir script `dev`/`start` no `package.json`:
-     ```
-     npm run dev
-     ```
-     ou
-     ```
-     npm start
-     ```
-   - Alternativamente:
-     ```
-     node server.js
-     ```
-3. O servidor roda na porta configurada em `PORT` (padrão: `3000`).
+### Backend
 
-Frontend
-1. Instale dependências:
-   ```
-   cd frontend
-   npm install
-   ```
-2. Inicie a aplicação:
-   ```
-   npm run dev
-   ```
-3. Abra o navegador no endereço mostrado pelo Vite (normalmente `http://localhost:5173`).
+Com o terminal na pasta `/backend`:
+```bash
+npm run dev
+```
+O servidor será iniciado em `http://localhost:3000` (ou na porta definida em seu `.env`).
+
+### Frontend
+
+Com o terminal na pasta `/frontend`:
+```bash
+npm run dev
+```
+A aplicação React será iniciada e estará acessível em `http://localhost:5173` (ou em outra porta indicada pelo Vite).
 
 ---
 
 ## API principal
 
-As rotas principais expostas pelo backend (conforme `server.js`) são:
-- `POST /api/auth` — Autenticação / registro (dependendo das rotas implementadas)
-- `GET|POST /api/auctions` — Endpoints de criação/listagem/consulta de leilões
-- `POST /api/bids` — Endpoints para submeter lances
+As rotas principais expostas pelo backend são:
+- `POST /api/auth/register` — Para registro de novos usuários.
+- `POST /api/auth/login` — Para autenticação de usuários.
+- `GET /api/auctions` — Para listar os leilões.
+- `POST /api/bids` — Para submeter um novo lance.
+- `GET /api/notifications` — Para listar notificações de um usuário.
 
-(Confira os arquivos em `backend/routes` para detalhes dos endpoints e payloads esperados.)
+Para mais detalhes, consulte os arquivos na pasta `backend/routes`.
 
 ---
 
 ## WebSocket (Tempo real)
 
-O backend inicia um servidor WebSocket para envio de atualizações de lances em tempo real. Fluxo básico (mensagens JSON):
+O servidor WebSocket escuta na mesma porta do servidor HTTP. O fluxo de mensagens esperado é:
 
-- Cliente envia para participar de um leilão:
+- **Cliente entra em um leilão:**
   ```json
   { "type": "join-auction", "auctionId": "<ID_DO_LEILÃO>" }
   ```
-- Cliente envia um novo lance:
+- **Cliente envia um novo lance:**
   ```json
   { "type": "new-bid", "auctionId": "<ID_DO_LEILÃO>", "payload": { /* dados do lance */ } }
   ```
-- Servidor broadcast para clientes do leilão:
+- **Servidor envia atualização para os participantes:**
   ```json
   { "type": "bid-update", "data": { /* dados do novo lance */ } }
   ```
-
-Conectar-se via WebSocket para o mesmo host/porta do backend, por exemplo:
-- ws://localhost:3000
 
 ---
 
 ## Banco de dados
 
-- O projeto usa PostgreSQL. Configure as variáveis em `/backend/.env`.
-- Se não houver migrations no repositório, crie as tabelas necessárias manualmente ou adicione migrações. Verifique `backend/config` para arquivos de configuração de DB e possíveis scripts.
-- O backend executa `db.testConnection()` ao iniciar — garanta que as credenciais estejam corretas.
+O projeto utiliza PostgreSQL. As configurações de conexão estão no arquivo `/backend/.env`. O backend tentará testar a conexão com o banco de dados na inicialização.
 
 ---
 
 ## Contribuição
 
-- Abra uma issue para discutir mudanças importantes.
-- Faça um fork, crie uma branch com a feature/fix, e envie um pull request.
-- Siga as convenções de código do projeto e escreva mensagens de commit claras.
+Contribuições são bem-vindas! Sinta-se à vontade para abrir uma *issue* para discutir uma nova feature ou reportar um bug. Pull requests são sempre apreciados.
 
 ---
 
 ## Licença
 
-Adicione aqui a licença do projeto (por exemplo, MIT) ou qualquer restrição de uso.
-
----
-
-Se quiser, eu posso:
-- Criar o arquivo README.md diretamente no repositório,
-- Ajustar o conteúdo (mais detalhes sobre endpoints, esquema do banco ou instruções Docker),
-- Gerar um exemplo de arquivo `.env` seguro sem dados reais,
-- Ou criar um guia de instalação passo a passo com scripts de migração/seed se você fornecer os esquemas.
-
-## Branches
-
-Adicionando um novo Branch aprendendo um pouco mais sobre o Git
+Este projeto é de código aberto e está sob a Licença MIT.
