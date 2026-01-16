@@ -1,18 +1,35 @@
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-import './App.css'
-import Reverse from './reverse_auction_docs.tsx'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import Features from './components/Features';
+import AuctionList from './components/AuctionList';
+import Register from './components/Register';
+import Login from './components/Login';
 
+const HomePage = () => (
+  <>
+    <Hero />
+    <Features />
+    <AuctionList />
+    {/* Footer viria aqui futuramente */}
+  </>
+);
 
 function App() {
   return (
-    <>
-      <div>
-        <Reverse />
+    <Router>
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          {/* Rotas futuras: /auctions/:id, /dashboard */}
+        </Routes>
       </div>
-    </>    
-  )
+    </Router>
+  );
 }
 
-export default App
+export default App;
