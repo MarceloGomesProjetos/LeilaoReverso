@@ -54,6 +54,96 @@ exports.getAuctionById = async (req, res) => {
   }
 };
 
+// Atualizar um leilão
+exports.updateAuction = async (req, res) => {
+  const { id } = req.params;
+  const { title, description, category } = req.body;
+  const buyer_id = req.user.id;
+
+  try {
+    const result = await query(
+      `UPDATE auctions 
+       SET title = $1, description = $2, category = $3
+       WHERE id = $4 AND buyer_id = $5
+       RETURNING *`,
+      [title, description, category, id, buyer_id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Leilão não encontrado ou você не tem permissão para editá-lo' });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Erro ao atualizar leilão:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Deletar um leilão
+exports.deleteAuction = async (req, res) => {
+  const { id } = req.params;
+  const buyer_id = req.user.id;
+
+  try {
+    const result = await query(
+      'DELETE FROM auctions WHERE id = $1 AND buyer_id = $2 RETURNING *',
+      [id, buyer_id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Leilão não encontrado ou você não tem permissão para deletá-lo' });
+    }
+    
+    res.status(204).send(); // No Content
+  } catch (error) {
+    console.error('Erro ao deletar leilão:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Fechar um leilão
+exports.closeAuction = async (req, res) => {
+  const { id } = req.params;
+  const buyer_id = req.user.id;
+
+  try {
+    const result = await query(
+      `UPDATE auctions 
+       SET status = 'closed'
+       WHERE id = $1 AND buyer_id = $2
+       RETURNING *`,
+      [id, buyer_id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Leilão não encontrado ou você não tem permissão para fechá-lo' });
+    }
+    
+    // Aqui, futuramente, poderia ser adicionada a lógica para determinar o vencedor
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Erro ao fechar leilão:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Gerar relatório de IA para um leilão
+exports.getAuctionReport = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const report = await aiService.generateAuctionReport(id);
+    if (!report) {
+      return res.status(404).json({ error: 'Relatório não pôde ser gerado ou leilão não encontrado.' });
+    }
+    res.json(report);
+  } catch (error) {
+    console.error('Erro ao gerar relatório de IA:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 exports.getBidSuggestion = async (req, res) => {
   const { id } = req.params; // ID do leilão    
   try {
