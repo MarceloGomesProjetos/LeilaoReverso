@@ -4,15 +4,15 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Features from './components/Features';
 import AuctionList from './components/AuctionList';
-import Register from './components/Register';
-import Login from './components/Login';
+import Register from './pages/Register';
+import Login from './pages/Login';
 import { Toaster } from 'react-hot-toast';
 import PrivateRoute from './components/PrivateRoute';
-import Dashboard from './components/Dashboard';
-import CreateAuction from './components/CreateAuction';
-import AuctionRoom from './components/AuctionRoom';
-import Faq from './components/Faq';
-import AboutUs from './components/AboutUs';
+import Dashboard from './pages/Dashboard';
+import CreateAuction from './pages/CreateAuction';
+import AuctionRoom from './pages/AuctionRoom';
+import Faq from './pages/Faq';
+import AboutUs from './pages/AboutUs';
 
 
 const HomePage = () => (

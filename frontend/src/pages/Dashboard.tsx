@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import api from '../services/api';
 import { Gavel, Plus, LayoutDashboard, History, Settings } from 'lucide-react';
 
 const Dashboard = () => {
