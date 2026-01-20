@@ -2,3 +2,4 @@ Makedown_LeilaoReverso.md
 ScriptDB.sql
 backend/.env
 backend/services/test-email.js
+.env

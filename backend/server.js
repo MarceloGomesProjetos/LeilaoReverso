@@ -3,7 +3,7 @@ const cors = require('cors');
 const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env')});
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const authRoutes = require('./routes/auth');
 const auctionRoutes = require('./routes/auctions');
@@ -29,7 +29,7 @@ app.use('/api/notifications', notificationRoutes);
 
 db.testConnection(); // Testa a conexão ao iniciar
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
