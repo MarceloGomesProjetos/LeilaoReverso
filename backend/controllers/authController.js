@@ -1,7 +1,9 @@
 // controllers/authController.js
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { query } = require('../config/database');
+const { sendResetPasswordEmail } = require('../services/emailService');
 
 // Função para gerar token JWT
 const generateToken = (user) => {
@@ -336,5 +338,88 @@ exports.validateToken = async (req, res) => {
       error: 'Erro ao validar token',
       details: error.message
     });
+  }
+};
+
+// Solicitar recuperação de senha
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const userResult = await query('SELECT * FROM users WHERE email = $1', [email.toLowerCase()]);
+
+    if (userResult.rows.length === 0) {
+      // Para não revelar se um email está ou não cadastrado, enviamos uma resposta de sucesso genérica
+      return res.json({ message: 'Se um usuário com este e-mail existir, um link de recuperação foi enviado.' });
+    }
+
+    // Gerar token
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Definir data de expiração (1 hora)
+    const expires = new Date(Date.now() + 3600000); // 1 hour
+
+    await query(
+      'UPDATE users SET reset_password_token = $1, reset_password_expires = $2 WHERE email = $3',
+      [tokenHash, expires, email.toLowerCase()]
+    );
+
+    // --- PARA DESENVOLVIMENTO ---
+    // O envio de email foi desativado temporariamente para permitir o teste do fluxo de recuperação de senha
+    // sem a necessidade de configurar um servidor de email. O token de reset será retornado na resposta.
+    // Em produção, remova a linha com `token` e descomente a linha `await sendResetPasswordEmail(email, token);`
+    
+    // await sendResetPasswordEmail(email, token);
+
+    res.json({ 
+        message: 'Se um usuário com este e-mail existir, um link de recuperação foi enviado. (DEV ONLY: token abaixo)',
+        token: token // Apenas para desenvolvimento
+    });
+
+  } catch (error) {
+    console.error('Erro ao solicitar recuperação de senha:', error);
+    res.status(500).json({ error: 'Erro interno ao processar a solicitação.' });
+  }
+};
+
+// Redefinir a senha
+exports.resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    if (!password || password.length < 6) {
+      return res.status(400).json({ error: 'Senha inválida ou menor que 6 caracteres.' });
+    }
+
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const userResult = await query(
+      'SELECT * FROM users WHERE reset_password_token = $1 AND reset_password_expires > NOW()',
+      [tokenHash]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(400).json({ error: 'Token inválido ou expirado.' });
+    }
+
+    const user = userResult.rows[0];
+
+    // Hash da nova senha
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    // Atualiza a senha e limpa o token
+    await query(
+      'UPDATE users SET password_hash = $1, reset_password_token = NULL, reset_password_expires = NULL, updated_at = NOW() WHERE id = $2',
+      [passwordHash, user.id]
+    );
+
+    res.json({ message: 'Senha redefinida com sucesso!' });
+
+  } catch (error) {
+    console.error('Erro ao redefinir senha:', error);
+    res.status(500).json({ error: 'Erro interno ao redefinir a senha.' });
   }
 };

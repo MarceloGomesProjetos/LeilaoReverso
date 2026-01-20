@@ -43,6 +43,23 @@ router.put('/profile', authMiddleware, authController.updateProfile);
  */
 router.put('/change-password', authMiddleware, authController.changePassword);
 
+
+/**
+ * @route   POST /api/auth/forgot-password
+ * @desc    Solicitar redefinição de senha
+ * @access  Public
+ * @body    { email }
+ */
+router.post('/forgot-password', authController.forgotPassword);
+
+/**
+ * @route   POST /api/auth/reset-password/:token
+ * @desc    Redefinir a senha com um token válido
+ * @access  Public
+ * @body    { password }
+ */
+router.post('/reset-password/:token', authController.resetPassword);
+
 /**
  * @route   GET /api/auth/validate
  * @desc    Validar token JWT

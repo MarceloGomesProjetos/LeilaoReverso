@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const WebSocket = require('ws');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env')});
 
 const authRoutes = require('./routes/auth');
 const auctionRoutes = require('./routes/auctions');

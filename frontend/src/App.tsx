@@ -46,7 +46,7 @@ function App() {
             <Route path='/auctions/create' element={<CreateAuction />}/>
             <Route path="/auctions/:id" element={<AuctionRoom />} />
           </Route>
-          /* Rotas Públicas de Recuperação */
+          {/* Rotas Públicas de Recuperação */}
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           {/* <Route path="/forgot-password" element={<ForgotPassword />} />
            */}

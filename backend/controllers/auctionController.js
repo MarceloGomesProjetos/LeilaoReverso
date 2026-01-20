@@ -70,7 +70,7 @@ exports.updateAuction = async (req, res) => {
     );
     
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Leilão não encontrado ou você не tem permissão para editá-lo' });
+      return res.status(404).json({ error: 'Leilão não encontrado ou você não tem permissão para editá-lo' });
     }
     
     res.json(result.rows[0]);

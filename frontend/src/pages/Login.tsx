@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, LogIn, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, LogIn, ArrowLeft, Send } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -7,9 +7,10 @@ import toast from 'react-hot-toast';
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [forgotEmail, setForgotEmail] = useState('');
   const [view, setView] = useState<'login' | 'forgot'>('login');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const loadingToast = toast.loading('Autenticando...');
 
@@ -29,6 +30,25 @@ const Login = () => {
     } catch (error: any) {
       toast.dismiss(loadingToast);
       const message = error.response?.data?.error || 'E-mail ou senha incorretos';
+      toast.error(message);
+    }
+  };
+
+  const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail) {
+      return toast.error('Por favor, digite seu e-mail.');
+    }
+    const loadingToast = toast.loading('Enviando link de recuperação...');
+
+    try {
+      await api.post('/auth/forgot-password', { email: forgotEmail });
+      toast.dismiss(loadingToast);
+      toast.success('Se uma conta com este e-mail existir, um link será enviado!');
+      setView('login'); // Volta para a tela de login
+    } catch (error: any) {
+      toast.dismiss(loadingToast);
+      const message = error.response?.data?.error || 'Erro ao enviar o link. Tente novamente.';
       toast.error(message);
     }
   };
@@ -58,7 +78,7 @@ const Login = () => {
                 <h2 className="text-3xl font-bold text-blue-900 mb-2">Login</h2>
                 <p className="text-gray-500">Entre com sua conta corporativa.</p>
               </div>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleLoginSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-700 ml-1">E-mail</label>
                   <div className="relative">
@@ -105,7 +125,7 @@ const Login = () => {
               </form>
             </>
           ) : (
-            <div className="space-y-6">
+            <form onSubmit={handleForgotPasswordSubmit} className="space-y-6">
               <div>
                 <h3 className="text-2xl font-bold text-blue-900 mb-2">Recuperar Senha</h3>
                 <p className="text-gray-500">
@@ -119,23 +139,26 @@ const Login = () => {
                   <input
                     type="email"
                     required
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
                     className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     placeholder="seu@email.com"
                   />
                 </div>
               </div>
               <button
-                type="button"
+                type="submit"
                 className="w-full py-4 mt-4 bg-blue-700 text-white font-black rounded-xl hover:bg-blue-800 transition-all shadow-xl shadow-blue-100 flex items-center justify-center group"
               >
                 ENVIAR LINK
+                <Send className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <p className="mt-4 text-center text-sm">
-                <button onClick={() => setView('login')} className="text-blue-700 font-bold hover:underline">
+                <button type="button" onClick={() => setView('login')} className="text-blue-700 font-bold hover:underline">
                   Voltar para o Login
                 </button>
               </p>
-            </div>
+            </form>
           )}
 
           <p className="mt-10 text-center text-gray-500 font-medium">
