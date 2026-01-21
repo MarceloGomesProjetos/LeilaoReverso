@@ -4,3 +4,4 @@ backend/.env
 backend/services/test-email.js
 .env
 backend/scripts/update_schema_v2.sql
+add_admin_role.sql
